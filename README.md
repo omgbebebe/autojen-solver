@@ -36,4 +36,20 @@ git:4.5.0
   3. run application with a target version of Jenkins core as a parameter
 ```sh
 $ autojen-plugins-solver --jenkins-version 2.263.1
+active-directory:2.22
+mailer:1.34
+display-url-api:2.3.4
+ansible:1.1
+credentials:2.3.15
+structs:1.22
+plain-credentials:1.7
+ssh-credentials:1.18.1
+trilead-api:1.0.13
+ansicolor:0.7.3
+authentication-tokens:1.4
+authorize-project:1.3.0
+branch-api:2.6.2
+cloudbees-folder:6.15
+scm-api:2.6.4
+...skipped...
 ```
