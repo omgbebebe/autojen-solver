@@ -1,6 +1,10 @@
+{-# language DeriveGeneric #-}
+{-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
 module Autojen.Types where
 
+-- base
+import GHC.Generics
 -- aeson
 import Data.Aeson.Types
 -- text
@@ -15,6 +19,12 @@ instance FromJSON Versioning where
   parseJSON err =
     prependFailure "parsing Versioning failed, "
       (typeMismatch "String" err)
+
+instance ToJSON Version where
+  toJSON v = String (prettyVer v)
+
+instance ToJSON Versioning where
+  toJSON v = String (prettyV v)
 
 instance FromJSON Version where
   parseJSON (String v) = case version v of
@@ -31,7 +41,7 @@ data PackageDependency = PackageDependency
   { pkgDepName :: Name
   , pkgDepMinVersion :: Versioning
   , pkgDepIsOptional :: Bool
-  } deriving (Eq, Show)
+  } deriving (Eq, Show, Generic)
 
 instance FromJSON PackageDependency where
   parseJSON = withObject "dependency" $ \v -> PackageDependency
@@ -39,16 +49,18 @@ instance FromJSON PackageDependency where
     <*> v .: "version"
     <*> v .: "optional"
 
+instance ToJSON PackageDependency
+
 data Package = Package
   { pkgName :: Name
   , pkgVersion :: Versioning
-  , pkgBuildData :: Text
+  , pkgBuildDate :: Text
   , pkgDependencies :: [PackageDependency]
   , pkgRequiredCore :: Version
   , pkgSha1 :: Text
   , pkgSha256 :: Text
   , pkgUrl :: Url
-  } deriving (Eq, Show)
+  } deriving (Eq, Show, Generic)
 
 instance FromJSON Package where
   parseJSON = withObject "Package" $ \v -> Package
@@ -60,3 +72,20 @@ instance FromJSON Package where
     <*> v .: "sha1"
     <*> v .: "sha256"
     <*> v .: "url"
+
+{- No isomorphism here!
+-- we just drop the dependencies field for output simplification
+-- actual it needs to be converted to a special `output` type
+-- or something like that
+-- maybe it will be implemented later in case of need
+-}
+instance ToJSON Package where
+  toJSON Package{..} = object
+    [ "name" .= pkgName
+    , "version" .= pkgVersion
+    , "buildDate" .= pkgBuildDate
+    , "requiredCore" .= pkgRequiredCore
+    , "sha1" .= pkgSha1
+    , "sha256" .= pkgSha256
+    , "url" .= pkgUrl
+    ]

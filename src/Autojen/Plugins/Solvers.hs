@@ -5,13 +5,14 @@ module Autojen.Plugins.Solvers
 ) where
 -- base
 import Data.Maybe
-import Data.List (nub)
+import Data.List (nub, sortOn)
 -- aeson
 import Data.Aeson
 -- bytestring
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 -- containers
+import qualified Data.Map as M
 import Data.Tree
 -- text
 import qualified Data.Text as T
@@ -22,6 +23,18 @@ import Data.Versions
 import Autojen.Plugins.Parsers (parsePluginsList)
 import Autojen.Types
 
+resolveDoubles :: [Package] -> [Package]
+resolveDoubles pkgs =
+  let
+    m = foldr (
+      \p acc -> case M.lookup (pkgName p) acc of
+        Just x -> let ps = filter (\p -> pkgName p == pkgName x) pkgs
+                      maxVer = head $ reverse $ sortOn pkgVersion ps
+                  in M.insert (pkgName p) maxVer acc
+        Nothing -> M.insert (pkgName p) p acc
+      ) M.empty pkgs
+  in M.elems m
+
 resolvePlugins :: ByteString -> Version -> ByteString -> [Package]
 resolvePlugins pluginsDb jenVersion inputPlugins =
   let
@@ -31,7 +44,7 @@ resolvePlugins pluginsDb jenVersion inputPlugins =
     initialPlugins = parsePluginsList inputPlugins
     b = buildDeps pkgs jenVersion
     allDeps = nub $ concat $ map flatten $ unfoldForest b initialPlugins
-  in map (
+  in resolveDoubles $ map (
     \p -> case findPackage p jenVersion pkgs of
       Nothing -> error $ show $ "cannot find " <> fst p <> ":" <> prettyV (snd p) <> " for Jenkins " <> prettyVer jenVersion
       Just x -> x

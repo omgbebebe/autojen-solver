@@ -35,7 +35,7 @@ git:4.5.0
 ```
   3. run application with a target version of Jenkins core as a parameter
 ```sh
-$ autojen-plugins-solver --jenkins-version 2.263.1
+$ autojen-plugins-solver --jenkins-version 2.263.1 --plain
 active-directory:2.22
 mailer:1.34
 display-url-api:2.3.4
@@ -53,3 +53,5 @@ cloudbees-folder:6.15
 scm-api:2.6.4
 ...skipped...
 ```
+
+To change output format try to use `--json` or `--nix` parameter.

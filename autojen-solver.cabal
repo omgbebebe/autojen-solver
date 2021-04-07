@@ -24,9 +24,11 @@ library
                       ,aeson
                       ,bytestring
                       ,containers
+                      ,hnix >= 0.12
                       ,text
                       ,versions
   exposed-modules:     Autojen.Plugins.Parsers
+                       Autojen.Plugins.PPrinters
                        Autojen.Plugins.Solvers
                        Autojen.Types
 
